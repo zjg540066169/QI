@@ -50,8 +50,8 @@ class Test_Net(object):
     
 if __name__=='__main__':
     path = r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_15m_singal_regular_20190226.json'
-    pca_path = r'BTC/15PCA.m'
-    save_path = r'BTC/15LSTM.pth'
+    pca_path = r'BTC15PCA.m'
+    save_path = r'BTC15LSTM.pth'
     tn = Test_Net(save_path)
     print(tn.test(path,pca_path))
     

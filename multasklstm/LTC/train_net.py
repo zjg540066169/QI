@@ -87,10 +87,10 @@ class Train_Net(object):
             epochnum = 240
             for epoch in range(epochnum):
                 inputs, labels = torch.autograd.Variable(torch.Tensor(train_x)), torch.autograd.Variable(torch.LongTensor(train_y))
-                #print(labels.size())
+                print(labels[:,0].size())
                 optimizer.zero_grad()
                 outputs = net(inputs)
-                
+                print(outputs[0].size())
                 loss = cost(outputs,labels)
                 train_accuracy = 0
                 for i in range(4):
@@ -120,7 +120,7 @@ class Train_Net(object):
         
 
 if __name__ == '__main__':
-    path_list = [r'data/bitfinex_2017-01-01_to_2019-01-14_eth_usdt_1h_singal_regular_20190226.json',r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_1h_singal_regular_20190226.json',r'data/bitfinex_2017-01-01_to_2019-01-15_ltc_usdt_1h_singal_regular_20190226.json']#,r'data/cccagg_1498676400_to_1550865600_eos_usd_1h_singal_regular_20190226.json',r'data/cccagg_1521208800_to_1550977200_ont_usd_1h_singal_regular_20190226.json']
+    path_list = r'../data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_15m_singal_regular_20190226.json'#,r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_1h_singal_regular_20190226.json',r'data/bitfinex_2017-01-01_to_2019-01-15_ltc_usdt_1h_singal_regular_20190226.json']#,r'data/cccagg_1498676400_to_1550865600_eos_usd_1h_singal_regular_20190226.json',r'data/cccagg_1521208800_to_1550977200_ont_usd_1h_singal_regular_20190226.json']
     path = r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_15m_singal_regular_20190226.json'
     pca_path = r'1PCA.m'
     save_path = r'1LSTM.pth'

@@ -29,7 +29,7 @@ class EncoderRNN(nn.Module):
         '''
         #embedded = self.embedding(input_seqs)
         #packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_lengths)
-        outputs, hidden = self.relu(self.gru(input_seqs, hidden))
+        outputs, hidden = self.gru(input_seqs, hidden)
         #outputs, output_lengths = torch.nn.utils.rnn.pad_packed_sequence(outputs)  # unpack (back to padded)
         outputs = outputs[:, :, :self.hidden_size]  # Sum bidirectional outputs
         return outputs, hidden
@@ -58,13 +58,15 @@ class Attn(nn.Module):
         '''
         max_len = encoder_outputs.size(1)
         this_batch_size = encoder_outputs.size(0)
+        hidden = hidden.repeat(max_len,1,1)
         #H = hidden.repeat(max_len,1,1).transpose(0,1)
-        #encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
+        encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
         attn_energies = self.score(hidden,encoder_outputs) # compute attention score
                 
         return F.softmax(attn_energies).unsqueeze(1) # normalize with softmax
 
     def score(self, hidden, encoder_outputs):
+        #print(hidden.size(),encoder_outputs.size())
         energy = F.tanh(self.attn(torch.cat([hidden, encoder_outputs], 2))) # [B*T*2H]->[B*T*H]
         energy = energy.transpose(2,1) # [B*H*T]
         v = self.v.repeat(encoder_outputs.data.shape[0],1).unsqueeze(1) #[B*1*H]
@@ -84,7 +86,7 @@ class BahdanauAttnDecoderRNN(nn.Module):
         self.gru = nn.GRU(hidden_size + output_size, hidden_size, n_layers, dropout=dropout_p,batch_first=True)
         #self.attn_combine = nn.Linear(hidden_size + embed_size, hidden_size)
         self.out = nn.Linear(hidden_size, output_size)
-        self.bn = torch.nn.BatchNorm1d(hidden_size)
+        self.bn = torch.nn.BatchNorm1d(1)
 
     def forward(self, word_input, last_hidden, encoder_outputs):
         '''
@@ -108,18 +110,28 @@ class BahdanauAttnDecoderRNN(nn.Module):
         word_input = word_input.view(word_input.size(0),1, -1) # (1,B,V)
         #word_embedded = self.dropout(word_embedded)
         # Calculate attention weights and apply to encoder outputs
-        attn_weights = self.attn(last_hidden[-1], encoder_outputs)
+        
+        attn_weights = self.attn(last_hidden[-1], encoder_outputs).transpose(0,2)
+        #print(attn_weights.size(),encoder_outputs.size())
+
+        encoder_outputs = encoder_outputs
         context = attn_weights.bmm(encoder_outputs)  # (B,1,V)
-        #context = context.transpose(0, 1)  # (1,B,V)
+        #print(context.size(),encoder_outputs.size(),word_input.size())
+
         # Combine embedded input word and attended context, run through RNN
+        #print(context.size(),word_input.size())
+
         rnn_input = torch.cat((word_input, context), 2)
         #rnn_input = self.attn_combine(rnn_input) # use it in case your size of rnn_input is different
-        output, hidden = self.gru(rnn_input, last_hidden)
+        #print(rnn_input.size(),last_hidden.size())
+        output, hidden = self.gru(rnn_input, last_hidden[-1].unsqueeze(0))
+        
         output = output.squeeze(0)  # (1,B,V)->(B,V)
         # context = context.squeeze(0)
         # update: "context" input before final layer can be problematic.
         # output = F.log_softmax(self.out(torch.cat((output, context), 1)))
         output = self.bn(output)
-        output = self.out(output)
+        output = self.out(output).squeeze(1)
+        #print(output.size())
         # Return final output, hidden state
         return output, hidden
