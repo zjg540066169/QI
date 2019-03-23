@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.externals import joblib
 class data_process(object):
-    def __init__(self,path,pcapath,MulEncoding = 13,ERROR_RATE = 0, ERROR_RATE_Vol = 0.2, input_length = 96,predict_length = 4,last_length = 16):
+    def __init__(self,path,pcapath,MulEncoding = 13,ERROR_RATE = 0, ERROR_RATE_Vol = 0.2, input_length = 96,predict_length = 4,last_length = 16, long_input = False):
         self.data = pd.DataFrame(rd.Read_data(path).decode())
         #self.data.index = self.data.loc[:,'time']
         self.data.drop(['time'],axis=1,inplace=True)
@@ -25,6 +25,11 @@ class data_process(object):
         self.predict_length = predict_length
         self.last_length = last_length
         self.pcapath = pcapath
+        self.long_input = long_input
+        if self.long_input:
+            self.PCA_dimension = 300
+        else:
+            self.PCA_dimension = 50
         
     def process(self):
         #return self.data
@@ -112,33 +117,32 @@ class data_process(object):
         train_y[train_y == 0 ] = np.nan
         train_y.columns = ['MAClassify','MAClassifyThrehold','DCClassifyHigh','DCClassifyLow']        
         for i in range(train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1):
-            if train.index[i+input_length] not in index:
-                #print(1)
-                continue
-            try:
-                print(i,train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1)
-                    #print(train_data.loc[train.index[i+input_length:i+input_length+predict_length],"MA5Close"].values)
-                train_y.iloc[i+input_length,0] = self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"])
-                train_y.iloc[i+input_length,1] = self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length_EMA_threhold],"021_TR"])
-                train_y.iloc[i+input_length,2] = self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])
-                train_y.iloc[i+input_length,3] = self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])
-                train_x.append(train.iloc[i:i+input_length,:].values)
+            if train.index[i+input_length] in index: 
+                for j in range(-2,3):
+                    try:
+                        print(i+j,train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1)
+                        train_y.iloc[i+input_length+j,0] = self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"])
+                        train_y.iloc[i+input_length+j,1] = self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length_EMA_threhold],"021_TR"])
+                        train_y.iloc[i+input_length+j,2] = self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])
+                        train_y.iloc[i+input_length+j,3] = self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])
+                        train_x.append(train.iloc[i+j:i+input_length+j,:].values)
+                        continue
+                    except IndexError as e:
+                        print(e)
+                        break
 
-            except IndexError as e:
-                print(e)
-                break
         train_y = train_y.dropna(axis = 0)
         train_x = np.array(train_x)
         train_x = train_x.reshape(train_x.shape[0]*train_x.shape[1],train_x.shape[2])
         try:
-            
             pca = joblib.load(self.pcapath)
             train_x = pca.transform(train_x)
         except FileNotFoundError:
-            pca =PCA(n_components=50)
+            pca =PCA(n_components=self.PCA_dimension)
             train_x = pca.fit_transform(train_x)
             joblib.dump(pca, self.pcapath)
-        train_x = train_x.reshape(-1,input_length,train_x.shape[1])
+        if self.long_input == False:
+            train_x = train_x.reshape(-1,input_length,train_x.shape[1])
         self.X = train_x
         self.Y = train_y
         
