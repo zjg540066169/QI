@@ -68,16 +68,16 @@ class FCClassifier(torch.nn.Module):
 
         self.ln2 = torch.nn.Linear(self.hidden*2,self.hidden)
         
-        self.bn1 = torch.nn.BatchNorm1d(input_length)
+        self.bn1 = torch.nn.BatchNorm1d(self.hidden)
         self.out1 = torch.nn.Linear(self.hidden,3)
 
-        self.bn2 = torch.nn.BatchNorm1d(input_length)
+        self.bn2 = torch.nn.BatchNorm1d(self.hidden)
         self.out2 = torch.nn.Linear(self.hidden,3)
 
-        self.bn3 = torch.nn.BatchNorm1d(input_length)
+        self.bn3 = torch.nn.BatchNorm1d(self.hidden)
         self.out3 = torch.nn.Linear(self.hidden,3)
         
-        self.bn4 = torch.nn.BatchNorm1d(input_length)
+        self.bn4 = torch.nn.BatchNorm1d(self.hidden)
         self.out4 = torch.nn.Linear(self.hidden,3)
         
     def forward(self,x): 
@@ -131,7 +131,7 @@ class Train_Net(object):
         #return self.X,self.Y
         continue_train = True
         while continue_train:
-            train_x, val_x, train_y, val_y = train_test_split(self.X, self.Y.values, test_size=0.33)
+            train_x, val_x, train_y, val_y = train_test_split(self.X, self.Y, test_size=0.33)
             if NETWORK == 'FC':
                 net = FCClassifier(train_x.shape)
             else:
@@ -181,7 +181,7 @@ class Train_Net(object):
         
 
 if __name__ == '__main__':
-    path_list = r'../data/bitfinex_2017-01-01_to_2019-01-14_eth_usdt_15m_singal_regular_20190226.json'#,r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_1h_singal_regular_20190226.json',r'data/bitfinex_2017-01-01_to_2019-01-15_ltc_usdt_1h_singal_regular_20190226.json']#,r'data/cccagg_1498676400_to_1550865600_eos_usd_1h_singal_regular_20190226.json',r'data/cccagg_1521208800_to_1550977200_ont_usd_1h_singal_regular_20190226.json']
+    path_list = r'../data/bitfinex_2017-01-01_to_2019-01-14_eth_usdt_1h_singal_regular_20190226.json'#,r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_1h_singal_regular_20190226.json',r'data/bitfinex_2017-01-01_to_2019-01-15_ltc_usdt_1h_singal_regular_20190226.json']#,r'data/cccagg_1498676400_to_1550865600_eos_usd_1h_singal_regular_20190226.json',r'data/cccagg_1521208800_to_1550977200_ont_usd_1h_singal_regular_20190226.json']
     #path = r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_15m_singal_regular_20190226.json'
     if NETWORK == 'FC':
         pca_path = r'ETHFC15PCA.m'

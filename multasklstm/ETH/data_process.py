@@ -27,7 +27,7 @@ class data_process(object):
         self.pcapath = pcapath
         self.long_input = long_input
         if self.long_input:
-            self.PCA_dimension = 300
+            self.PCA_dimension = 50
         else:
             self.PCA_dimension = 50
         
@@ -113,27 +113,27 @@ class data_process(object):
         down_index = train[train.loc[:,'021'] == -1].index
         index = set(up_index.append(down_index))
         train_x = []
-        train_y = pd.DataFrame(np.zeros((train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1,4)))
-        train_y[train_y == 0 ] = np.nan
-        train_y.columns = ['MAClassify','MAClassifyThrehold','DCClassifyHigh','DCClassifyLow']        
+        train_y = []
         for i in range(train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1):
             if train.index[i+input_length] in index: 
                 for j in range(-2,3):
                     try:
                         print(i+j,train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1)
-                        train_y.iloc[i+input_length+j,0] = self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"])
-                        train_y.iloc[i+input_length+j,1] = self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length_EMA_threhold],"021_TR"])
-                        train_y.iloc[i+input_length+j,2] = self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])
-                        train_y.iloc[i+input_length+j,3] = self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])
+                        train_y.append([self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"]),self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length_EMA_threhold],"021_TR"]),self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length]),self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])])
                         train_x.append(train.iloc[i+j:i+input_length+j,:].values)
-                        continue
                     except IndexError as e:
                         print(e)
+                        train_y = np.array(train_y)
+                        train_x = np.array(train_x)
+                        print(train_x.shape,train_y.shape)
+
+                        exit()
                         break
 
-        train_y = train_y.dropna(axis = 0)
+        train_y = np.array(train_y)
         train_x = np.array(train_x)
-        train_x = train_x.reshape(train_x.shape[0]*train_x.shape[1],train_x.shape[2])
+        print(train_x.shape,train_y.shape)
+        train_x = train_x.reshape(train_x.shape[0],-1)
         try:
             pca = joblib.load(self.pcapath)
             train_x = pca.transform(train_x)

@@ -68,16 +68,16 @@ class FCClassifier(torch.nn.Module):
 
         self.ln2 = torch.nn.Linear(self.hidden*2,self.hidden)
         
-        self.bn1 = torch.nn.BatchNorm1d(input_length)
+        self.bn1 = torch.nn.BatchNorm1d(self.hidden)
         self.out1 = torch.nn.Linear(self.hidden,3)
 
-        self.bn2 = torch.nn.BatchNorm1d(input_length)
+        self.bn2 = torch.nn.BatchNorm1d(self.hidden)
         self.out2 = torch.nn.Linear(self.hidden,3)
 
-        self.bn3 = torch.nn.BatchNorm1d(input_length)
+        self.bn3 = torch.nn.BatchNorm1d(self.hidden)
         self.out3 = torch.nn.Linear(self.hidden,3)
         
-        self.bn4 = torch.nn.BatchNorm1d(input_length)
+        self.bn4 = torch.nn.BatchNorm1d(self.hidden)
         self.out4 = torch.nn.Linear(self.hidden,3)
         
     def forward(self,x): 
@@ -125,13 +125,16 @@ class Train_Net(object):
         data_proces = data_process(path,pca_path,long_input = long_input)
         data_proces.process()
         self.X,self.Y = data_proces.get_X(),data_proces.get_Y()
+        print(self.X.shape)
+        print(self.Y.shape)
         self.save_path = save_path
         
     def train(self,train_acc = 0.85,test_acc = 0.85):
         #return self.X,self.Y
         continue_train = True
         while continue_train:
-            train_x, val_x, train_y, val_y = train_test_split(self.X, self.Y.values, test_size=0.33)
+            
+            train_x, val_x, train_y, val_y = train_test_split(self.X, self.Y, test_size=0.33)
             if NETWORK == 'FC':
                 net = FCClassifier(train_x.shape)
             else:
