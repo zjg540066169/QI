@@ -133,7 +133,11 @@ class data_process(object):
         train_y = np.array(train_y)
         train_x = np.array(train_x)
         print(train_x.shape,train_y.shape)
-        train_x = train_x.reshape(train_x.shape[0],-1)
+        print(self.long_input)
+        if self.long_input == False:
+            train_x = train_x.reshape(train_x.shape[0]*train_x.shape[1],train_x.shape[2])
+        else:
+            train_x = train_x.reshape(train_x.shape[0],-1)
         try:
             pca = joblib.load(self.pcapath)
             train_x = pca.transform(train_x)
@@ -143,6 +147,7 @@ class data_process(object):
             joblib.dump(pca, self.pcapath)
         if self.long_input == False:
             train_x = train_x.reshape(-1,input_length,train_x.shape[1])
+        
         self.X = train_x
         self.Y = train_y
         

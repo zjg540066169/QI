@@ -88,19 +88,19 @@ class FCClassifier(torch.nn.Module):
         #print(x1.size())
         x1 = self.bn1(x)#BatchNormal
         x1 = self.out1(x1)
-        x1 = F.dropout(x1, 0.1, self.training).view(-1,3)
+        x1 = F.dropout(x1, 0.2, self.training).view(-1,3)
         
         x2 = self.bn2(x)#BatchNormal
         x2 = self.out2(x2)
-        x2 = F.dropout(x2, 0.1, self.training).view(-1,3)
+        x2 = F.dropout(x2, 0.2, self.training).view(-1,3)
 
         x3 = self.bn3(x)#BatchNormal
         x3 = self.out3(x3)
-        x3 = F.dropout(x3, 0.1, self.training).view(-1,3)
+        x3 = F.dropout(x3, 0.2, self.training).view(-1,3)
         
         x4 = self.bn4(x)#BatchNormal
         x4 = self.out4(x4)
-        x4 = F.dropout(x4, 0.1, self.training).view(-1,3)
+        x4 = F.dropout(x4, 0.2, self.training).view(-1,3)
         return [x1,x2,x3,x4]
     
 
@@ -122,12 +122,12 @@ class Train_Net(object):
             long_input = True
         else:
             long_input = False
-        data_proces = data_process(path,pca_path,long_input = long_input)
+        data_proces = data_process(path,pca_path,long_input = long_input,input_length = 48)
         data_proces.process()
         self.X,self.Y = data_proces.get_X(),data_proces.get_Y()
         self.save_path = save_path
         
-    def train(self,train_acc = 0.85,test_acc = 0.85):
+    def train(self,train_acc = 0.9,test_acc = 0.85):
         #return self.X,self.Y
         continue_train = True
         while continue_train:
@@ -147,32 +147,36 @@ class Train_Net(object):
             mse  = []
             epochnum = 240
             for epoch in range(epochnum):
-                train_accuracy = 0
+                train_accuracy_total = 0
                 for iter,(inputs,labels) in enumerate(train_dataloader):
                     optimizer.zero_grad()
                     outputs = net(inputs)
                     loss = cost(outputs,labels)
+                    train_accuracy = 0
                     for i in range(4):
                         train_accuracy += f1_score(labels[:,i].numpy(), torch.max(outputs[i].data,1)[1].numpy(), average='micro')
                     train_accuracy /= 4
-                    
+                    train_accuracy_total += train_accuracy
                     loss.backward()
                     optimizer.step()
-                train_accuracy /= (iter+1)
+                
+                train_accuracy_total /= (iter+1)
 
-                print("f1:",train_accuracy,end = "    ")
+                print("f1:",train_accuracy_total,end = "    ")
                 mse.append(train_accuracy)
             
                 net.eval()   
-                pre_accuracy = 0
+                pre_accuracy_total = 0
                 for iter, (inputs,true_y) in enumerate(test_dataloader):
                     predict_y = net(inputs)
+                    pre_accuracy = 0
                 #print(pd.Series(torch.max(predict_y.data,1)[1].numpy()).value_counts()[1]/pd.Series(val_y).value_counts()[1])
                     for i in range(4):
                         pre_accuracy += f1_score(true_y[:,i].numpy(), torch.max(predict_y[i].data,1)[1].numpy(), average='micro')
                     pre_accuracy /= 4
-                pre_accuracy /= iter
-                print("validation f1:",pre_accuracy)    
+                    pre_accuracy_total += pre_accuracy
+                pre_accuracy_total /= (iter+1)
+                print("validation f1:",pre_accuracy_total)    
                 net.train()
                 if train_accuracy > train_acc and pre_accuracy > test_acc:
                     continue_train = False
