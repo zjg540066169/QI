@@ -16,7 +16,7 @@ class data_process(object):
         #self.data.index = self.data.loc[:,'time']
         self.data.drop(['time'],axis=1,inplace=True)
         #print(self.data.shape)
-        self.data = self.data#.iloc[int(len(self.data)/5)*1:int(len(self.data)/5)*2,:]
+        self.data = self.data.iloc[int(len(self.data)/20)*1:int(len(self.data)/20)*2,:]
         self.MulEncoding = MulEncoding
         self.ERROR_RATE = ERROR_RATE
         self.ERROR_RATE_Vol = ERROR_RATE_Vol
@@ -118,6 +118,8 @@ class data_process(object):
             if train.index[i+input_length] in index: 
                 for j in range(-2,3):
                     try:
+                        if i+j <0:
+                            continue
                         print(i+j,train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1)
                         train_y.append([self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"]),self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length_EMA_threhold],"021_TR"]),self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length]),self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])])
                         train_x.append(train.iloc[i+j:i+input_length+j,:].values)
@@ -132,6 +134,7 @@ class data_process(object):
 
         train_y = np.array(train_y)
         train_x = np.array(train_x)
+        print(train_x)
         print(train_x.shape,train_y.shape)
         print(self.long_input)
         if self.long_input == False:
