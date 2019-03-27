@@ -69,7 +69,7 @@ class Data_download(object):
                 #time.sleep(60)
                 continue
 
-    def predict_data_process(self,data,pcapath,MulEncoding = 13,ERROR_RATE = 0, ERROR_RATE_Vol = 0.2, input_length = 96,predict_length = 4,last_length = 16):
+    def predict_data_process(self,data,pcapath,MulEncoding = 13,ERROR_RATE = 0, ERROR_RATE_Vol = 0.2, input_length = 96,predict_length = 4,last_length = 16,long_input = False):
         self.data = data
         if self.data.loc[self.data.index[-2],'021'] == 0:
             return 0
@@ -85,6 +85,7 @@ class Data_download(object):
         self.predict_length = predict_length
         self.last_length = last_length
         self.pcapath = pcapath
+        self.long_input = long_input
         MulEncoding = self.MulEncoding
         ERROR_RATE = self.ERROR_RATE
         ERROR_RATE_Vol = self.ERROR_RATE_Vol
@@ -161,10 +162,14 @@ class Data_download(object):
         #train_y[train_y == 0 ] = np.nan
         #train_y.columns = ['MAClassify','MAClassifyThrehold','DCClassifyHigh','DCClassifyLow']        
         train_x = np.array(train_x)
-        train_x = train_x.reshape(train_x.shape[0]*train_x.shape[1],train_x.shape[2])
+        if self.long_input:
+            train_x = train_x.reshape(train_x.shape[0],-1)
+        else: 
+            train_x = train_x.reshape(train_x.shape[0]*train_x.shape[1],train_x.shape[2])
         pca = joblib.load(self.pcapath)
         train_x = pca.transform(train_x)
-        train_x = train_x.reshape(-1,input_length,train_x.shape[1])
+        if self.long_input == False:
+            train_x = train_x.reshape(-1,input_length,train_x.shape[1])
         self.X = train_x
     
     def get_predictX(self):

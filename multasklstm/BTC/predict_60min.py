@@ -11,9 +11,10 @@ from train_net import LSTMClassifier,MulTaskLoss
 from sendEmail import sendMail
 import time,datetime,pytz,requests
 import pandas as pd
-coin = 'LTC'
-pcaPath = '1PCA.m'
-nnPath = '1LSTM.pth'
+NETWORK = 'FC'#FC LSTM Attention
+coin = 'BTC'
+pcaPath = coin+NETWORK+'60PCA.m'
+nnPath = coin+NETWORK+'60.pth'
 MulEncoding = 13
 ERROR_RATE = 0 
 ERROR_RATE_Vol = 0.2
@@ -26,6 +27,11 @@ to = "USDT"
 timespan = '1M'
 aggregate = 60
 send_time = -2
+long_input = False
+if NETWORK == 'FC':
+    pcaPath = coin+NETWORK+'60PCA.m'
+    nnPath = coin+NETWORK+'60.pth'
+    long_input = True
 
 
 def sendMessage(string,coin = coin,to = "USDT"):
@@ -48,12 +54,12 @@ if __name__=='__main__':
 
             dd = Data_download(pastSecond,int(time.time()),plateform,coin,to,timespan,aggregate)
             data = pd.DataFrame(dd.downloadData()['rows'])
-            if dd.predict_data_process(data,pcaPath,MulEncoding,ERROR_RATE, ERROR_RATE_Vol, input_length,predict_length,last_length) ==0:
+            if dd.predict_data_process(data,pcaPath,MulEncoding,ERROR_RATE, ERROR_RATE_Vol, input_length,predict_length,last_length,long_input = long_input) ==0:
                 time.sleep(60)
                 continue
             predict_X = dd.get_predictX()
             predict_result,predict_prob = NN.predict(predict_X)
-            string = 'LSTM LTC/USDT 现价 '+str(data.loc[data.index[-1],'close'])+'\n60M 五均线出现'
+            string = NETWORK+' '+coin+'/'+to+' 现价 '+str(data.loc[data.index[-1],'close'])+'\n60M 五均线出现'
             if data.loc[data.index[-2],'021'] == 1:
                 string += '上拐头'
             elif data.loc[data.index[-2],'021'] == -1:

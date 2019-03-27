@@ -127,7 +127,7 @@ class Train_Net(object):
         self.X,self.Y = data_proces.get_X(),data_proces.get_Y()
         self.save_path = save_path
         
-    def train(self,train_acc = 0.9,test_acc = 0.85):
+    def train(self,train_acc = 0.85,test_acc = 0.78):
         #return self.X,self.Y
         continue_train = True
         while continue_train:
@@ -188,8 +188,8 @@ if __name__ == '__main__':
     path_list = r'../data/bitfinex_2017-01-01_to_2019-01-14_eth_usdt_1h_singal_regular_20190226.json'#,r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_1h_singal_regular_20190226.json',r'data/bitfinex_2017-01-01_to_2019-01-15_ltc_usdt_1h_singal_regular_20190226.json']#,r'data/cccagg_1498676400_to_1550865600_eos_usd_1h_singal_regular_20190226.json',r'data/cccagg_1521208800_to_1550977200_ont_usd_1h_singal_regular_20190226.json']
     #path = r'data/bitfinex_2017-01-01_to_2019-01-15_btc_usdt_15m_singal_regular_20190226.json'
     if NETWORK == 'FC':
-        pca_path = r'ETHFC15PCA.m'
-        save_path = r'ETHFC15.pth'
+        pca_path = r'ETHFC60PCA.m'
+        save_path = r'ETHFC60.pth'
 
     tn = Train_Net(path_list,save_path,pca_path)
     

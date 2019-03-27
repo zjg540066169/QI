@@ -7,17 +7,18 @@ Created on Sat Mar  2 15:47:42 2019
 
 from data_download import Data_download
 from test_net import Test_Net
-from train_net import LSTMClassifier,MulTaskLoss
+from train_net import *
 from sendEmail import sendMail
 import time,datetime,pytz,requests
 import pandas as pd
-coin = 'LTC'
-pcaPath = '15PCA.m'
-nnPath = '15LSTM.pth'
+NETWORK = 'FC'#FC LSTM Attention
+coin = 'ETH'
+pcaPath = coin+NETWORK+'15PCA.m'
+nnPath = coin+NETWORK+'15.pth'
 MulEncoding = 13
 ERROR_RATE = 0 
 ERROR_RATE_Vol = 0.2
-input_length = 96
+input_length = 48
 predict_length = 4
 last_length = 16
 pastSecond = 15*60*200
@@ -26,7 +27,12 @@ to = "USDT"
 timespan = '1M'
 aggregate = 15
 send_time = -2
-
+long_input = False
+if NETWORK == 'FC':
+    pcaPath = coin+NETWORK+'15PCA.m'
+    nnPath = coin+NETWORK+'15.pth'
+    long_input = True
+    
 
 def sendMessage(string,coin = coin,to = "USDT"):
     message = {}
@@ -48,12 +54,12 @@ if __name__=='__main__':
 
             dd = Data_download(pastSecond,int(time.time()),plateform,coin,to,timespan,aggregate)
             data = pd.DataFrame(dd.downloadData()['rows'])
-            if dd.predict_data_process(data,pcaPath,MulEncoding,ERROR_RATE, ERROR_RATE_Vol, input_length,predict_length,last_length) ==0:
+            if dd.predict_data_process(data,pcaPath,MulEncoding,ERROR_RATE, ERROR_RATE_Vol, input_length,predict_length,last_length,long_input = long_input ) ==0:
                 time.sleep(60)
                 continue
             predict_X = dd.get_predictX()
             predict_result,predict_prob = NN.predict(predict_X)
-            string = 'LSTM LTC/USDT 现价 '+str(data.loc[data.index[-1],'close'])+'\n15M 五均线出现'
+            string = NETWORK+' '+coin+'/'+to+' 现价 '+str(data.loc[data.index[-1],'close'])+'\n15M 五均线出现'
             if data.loc[data.index[-2],'021'] == 1:
                 string += '上拐头'
             elif data.loc[data.index[-2],'021'] == -1:

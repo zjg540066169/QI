@@ -127,7 +127,7 @@ class Train_Net(object):
         self.X,self.Y = data_proces.get_X(),data_proces.get_Y()
         self.save_path = save_path
         
-    def train(self,train_acc = 0.9,test_acc = 0.85):
+    def train(self,train_acc = 0.85,test_acc = 0.78):
         #return self.X,self.Y
         continue_train = True
         while continue_train:
