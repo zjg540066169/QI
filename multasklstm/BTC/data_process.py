@@ -16,7 +16,7 @@ class data_process(object):
         #self.data.index = self.data.loc[:,'time']
         self.data.drop(['time'],axis=1,inplace=True)
         #print(self.data.shape)
-        self.data = self.data.iloc[int(len(self.data)/20)*1:int(len(self.data)/20)*2,:]
+        self.data = self.data#.iloc[int(len(self.data)/20)*1:int(len(self.data)/20)*2,:]
         self.MulEncoding = MulEncoding
         self.ERROR_RATE = ERROR_RATE
         self.ERROR_RATE_Vol = ERROR_RATE_Vol
