@@ -91,7 +91,7 @@ if __name__=='__main__':
             print(string)
             string = string.replace("--","-")
             print(string)
-            response = requests.post('http://order.shareted.com/openapi/coin/signal/report',data=sendMessage(string))
+            response = requests.post('http://106.75.90.217:30804/openapi/coin/signal/report',data=sendMessage(string))
                     # 通过get请求返回的文本值
             print(response.text)
             time.sleep(300)

@@ -157,7 +157,7 @@ class Data_download(object):
         predict_length = self.predict_length
 
         train = self.train
-        train_x = [train.iloc[-input_length:-1,:].values]
+        train_x = [train.iloc[-input_length-1:-1,:].values]
         #train_y = pd.DataFrame(np.zeros((train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1,4)))
         #train_y[train_y == 0 ] = np.nan
         #train_y.columns = ['MAClassify','MAClassifyThrehold','DCClassifyHigh','DCClassifyLow']        

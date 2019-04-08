@@ -7,7 +7,7 @@ Created on Sat Mar  2 15:47:42 2019
 
 from data_download import Data_download
 from test_net import Test_Net
-from train_net import LSTMClassifier,MulTaskLoss
+from train_net import *
 from sendEmail import sendMail
 import time,datetime,pytz,requests
 import pandas as pd
@@ -91,7 +91,7 @@ if __name__=='__main__':
             print(string)
             string = string.replace("--","-")
             print(string)
-            response = requests.post('http://order.shareted.com/openapi/coin/signal/report',data=sendMessage(string))
+            response = requests.post('http://106.75.90.217:30804/openapi/coin/signal/report',data=sendMessage(string))
                     # 通过get请求返回的文本值
             print(response.text)
             time.sleep(300)
