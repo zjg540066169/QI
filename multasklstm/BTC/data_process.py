@@ -63,13 +63,48 @@ class data_process(object):
         train.loc[:,"close_ma_5_minus_close_ma_30"] = (train.loc[:,"close_ma_5"] - train.loc[:,"close_ma_30"]) / train.loc[:,"close_ma_30"]
         train.loc[:,"close_ma_30_minus_close_ma_75"] = (train.loc[:,"close_ma_30"] - train.loc[:,"close_ma_75"]) / train.loc[:,"close_ma_75"]
        
-        
+        train_new_feature = pd.DataFrame()#pd.DataFrame(np.zeros(len(train),5*len(MAn)))        
+        N =20
+        weights = np.ones(N)/N
         for i in range(len(MAn)):
-            train.loc[:,"OMA"+str(MAn[i])] = (train.loc[:,"open"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]) / train.loc[:,"close"+"_ma_"+str(MAn[i])]
-            train.loc[:,"CMA"+str(MAn[i])] = (train.loc[:,"close"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]) / train.loc[:,"close"+"_ma_"+str(MAn[i])]
-            train.loc[:,"HMA"+str(MAn[i])] = (train.loc[:,"high"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]) / train.loc[:,"close"+"_ma_"+str(MAn[i])]
-            train.loc[:,"LMA"+str(MAn[i])] = (train.loc[:,"low"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]) / train.loc[:,"close"+"_ma_"+str(MAn[i])]
-            train.loc[:,"HL2MA"+str(MAn[i])] = (train.loc[:,"hl2"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]) / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+            
+# =============================================================================
+#             train.loc[:,"OMA"+str(MAn[i])] = np.abs(train.loc[:,"open"] - train.loc[:,"close"+"_ma_"+str(MAn[i])])# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+#             train.loc[:,"CMA"+str(MAn[i])] = np.abs(train.loc[:,"close"] - train.loc[:,"close"+"_ma_"+str(MAn[i])])# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+#             train.loc[:,"HMA"+str(MAn[i])] = np.abs(train.loc[:,"high"] - train.loc[:,"close"+"_ma_"+str(MAn[i])])# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+#             train.loc[:,"LMA"+str(MAn[i])] = np.abs(train.loc[:,"low"] - train.loc[:,"close"+"_ma_"+str(MAn[i])])# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+#             train.loc[:,"HL2MA"+str(MAn[i])] = np.abs(train.loc[:,"hl2"] - train.loc[:,"close"+"_ma_"+str(MAn[i])])# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+#             train.loc[:,"OSMA"+str(N)+str(MAn[i])] =  np.convolve(weights,train.loc[:,"OMA"+str(MAn[i])].values)[N-1:-N+1]
+#             train.loc[:,"CSMA"+str(N)+str(MAn[i])] =  np.convolve(weights,train.loc[:,"CMA"+str(MAn[i])].values)[N-1:-N+1]
+#             train.loc[:,"HSMA"+str(N)+str(MAn[i])] =  np.convolve(weights,train.loc[:,"HMA"+str(MAn[i])].values)[N-1:-N+1]
+#             train.loc[:,"LSMA"+str(N)+str(MAn[i])] =  np.convolve(weights,train.loc[:,"LMA"+str(MAn[i])].values)[N-1:-N+1]
+#             train.loc[:,"HL2SMA"+str(N)+str(MAn[i])] =  np.convolve(weights,train.loc[:,"HL2MA"+str(MAn[i])].values)[N-1:-N+1]
+# 
+# =============================================================================
+            OMA = (train.loc[:,"open"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]).values# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+            CMA = (train.loc[:,"close"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]).values# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+            HMA = (train.loc[:,"high"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]).values# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+            LMA = (train.loc[:,"low"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]).values# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+            HL2MA = (train.loc[:,"hl2"] - train.loc[:,"close"+"_ma_"+str(MAn[i])]).values# / train.loc[:,"close"+"_ma_"+str(MAn[i])]
+            OSMA =  np.convolve(weights,np.abs(OMA),'same')[N-1:]           
+            CSMA =  np.convolve(weights,np.abs(CMA),'same')[N-1:]
+            HSMA =  np.convolve(weights,np.abs(HMA),'same')[N-1:]
+            LSMA =  np.convolve(weights,np.abs(LMA),'same')[N-1:]
+            HL2SMA =  np.convolve(weights,np.abs(HL2MA),'same')[N-1:]
+            #print(OMA.shape,HL2SMA.shape)
+            O = ((OMA[N-1:] - HL2SMA) * 10 / OSMA.std() ).astype(np.int)
+            H = ((HMA[N-1:] - HL2SMA) * 10 / HSMA.std() ).astype(np.int)
+            L = ((LMA[N-1:] - HL2SMA) * 10 / LSMA.std() ).astype(np.int)
+            C = ((CMA[N-1:] - HL2SMA) * 10 / CSMA.std() ).astype(np.int)
+            HL2 = ((HL2MA[N-1:] - HL2SMA) / HL2SMA.std() ).astype(np.int)
+            train_new_feature.loc[:,'O'+str(MAn[i])] = O
+            train_new_feature.loc[:,'C'+str(MAn[i])] = C
+            train_new_feature.loc[:,'H'+str(MAn[i])] = H
+            train_new_feature.loc[:,'L'+str(MAn[i])] = L
+            train_new_feature.loc[:,'HL2'+str(MAn[i])] = HL2
+        
+        train_new_feature.index = train.index[N-1:]
+        train_new_feature[train_new_feature>31] = 31
         
         for i in ['022_HH','022_LL','022_med','022_fb1','022_fb2','022_fb3','022_fb4']:
             train.loc[:,"O"+i] = (train.loc[:,"open"] - train.loc[:,i]) / train.loc[:,i]
@@ -95,6 +130,8 @@ class data_process(object):
         VolMA[VolMA >= 1+ERROR_RATE_Vol] = 1
         VolMA[VolMA <= 1-ERROR_RATE_Vol] = -1
         train_data.loc[:,"VolMA"] = VolMA
+        train_data = pd.concat([train_data, train_new_feature], axis=1, join_axes=[train_data.index])
+
         self.train = train_data.iloc[MulEncoding-1:,:]
         self.train = train_data.dropna(axis = 0)
 

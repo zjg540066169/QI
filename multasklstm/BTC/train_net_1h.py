@@ -129,7 +129,7 @@ class Train_Net(object):
         print(self.Y.shape)
         self.save_path = save_path
         
-    def train(self,train_acc = 0.85,test_acc = 0.78):
+    def train(self,train_acc = 0.85,test_acc = 0.80):
         #return self.X,self.Y
         continue_train = True
         while continue_train:
@@ -193,8 +193,8 @@ if __name__ == '__main__':
     
     
     if NETWORK == 'FC':
-        pca_path = r'BTCFC60PCA.m'
-        save_path = r'BTCFC60.pth'
+        pca_path = r'BTCFC60PCA_new.m'
+        save_path = r'BTCFC60_new.pth'
 
     tn = Train_Net(path_list,save_path,pca_path)
     
