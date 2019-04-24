@@ -29,6 +29,9 @@ def train_model(model, opt):
             src = batch.src.transpose(0,1)
             trg = batch.trg.transpose(0,1)
             trg_input = trg[:, :-1]
+            print('src',src.size())
+            print('trg',trg.size())
+            print('trg_input',trg_input.size())
             src_mask, trg_mask = create_masks(src, trg_input, opt)
             preds = model(src, trg_input, src_mask, trg_mask)
             ys = trg[:, 1:].contiguous().view(-1)
@@ -83,13 +86,16 @@ def main():
     parser.add_argument('-checkpoint', type=int, default=0)
 
     opt = parser.parse_args()
-    
+    print(type(opt),opt)
     opt.device = 0 if opt.no_cuda is False else -1
     if opt.device == 0:
         assert torch.cuda.is_available()
     
     read_data(opt)
+    #print(opt.trg_data)
+
     SRC, TRG = create_fields(opt)
+    #print('SRC',SRC)
     opt.train = create_dataset(opt, SRC, TRG)
     model = get_model(opt, len(SRC.vocab), len(TRG.vocab))
     opt.optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.9, 0.98), eps=1e-9)
@@ -176,4 +182,4 @@ def promptNextAction(model, opt, SRC, TRG):
 
     # for asking about further training use while true loop, and return
 if __name__ == "__main__":
-    main()
+    a = main()

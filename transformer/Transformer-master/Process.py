@@ -54,16 +54,17 @@ def create_dataset(opt, SRC, TRG):
     print("creating dataset and iterator... ")
 
     raw_data = {'src' : [line for line in opt.src_data], 'trg': [line for line in opt.trg_data]}
-    df = pd.DataFrame(raw_data, columns=["src", "trg"])
     
+    df = pd.DataFrame(raw_data, columns=["src", "trg"])
+
     mask = (df['src'].str.count(' ') < opt.max_strlen) & (df['trg'].str.count(' ') < opt.max_strlen)
+    
     df = df.loc[mask]
 
     df.to_csv("translate_transformer_temp.csv", index=False)
     
     data_fields = [('src', SRC), ('trg', TRG)]
     train = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
-
     train_iter = MyIterator(train, batch_size=opt.batchsize, device=opt.device,
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                         batch_size_fn=batch_size_fn, train=True, shuffle=True)
