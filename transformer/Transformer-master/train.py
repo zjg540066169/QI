@@ -12,7 +12,7 @@ def train_model(model, opt):
     
     print("training model...")
     model.train()
-    start = time.time()
+    start = time.time() 
     if opt.checkpoint > 0:
         cptime = time.time()
                  
@@ -33,8 +33,13 @@ def train_model(model, opt):
             print('trg',trg.size())
             print('trg_input',trg_input.size())
             src_mask, trg_mask = create_masks(src, trg_input, opt)
+            #print(src_mask)
+            
             preds = model(src, trg_input, src_mask, trg_mask)
+            
             ys = trg[:, 1:].contiguous().view(-1)
+            print("preds",preds.size())
+            print('ys',ys.size())
             opt.optimizer.zero_grad()
             loss = F.cross_entropy(preds.view(-1, preds.size(-1)), ys, ignore_index=opt.trg_pad)
             loss.backward()

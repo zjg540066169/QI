@@ -9,7 +9,7 @@ class Embedder(nn.Module):
         self.d_model = d_model
         self.embed = nn.Embedding(vocab_size, d_model)
     def forward(self, x):
-        return self.embed(x)
+        return x
 
 class PositionalEncoder(nn.Module):
     def __init__(self, d_model, max_seq_len = 200, dropout = 0.1):
@@ -30,6 +30,7 @@ class PositionalEncoder(nn.Module):
  
     
     def forward(self, x):
+        return x
         # make embeddings relatively larger
         x = x * math.sqrt(self.d_model)
         #add constant to embedding

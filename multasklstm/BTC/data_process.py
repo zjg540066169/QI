@@ -171,9 +171,9 @@ class data_process(object):
 
         train_y = np.array(train_y)
         train_x = np.array(train_x)
-        print(train_x)
-        print(train_x.shape,train_y.shape)
-        print(self.long_input)
+        #print(train_x)
+        #print(train_x.shape,train_y.shape)
+        #print(self.long_input)
         if self.long_input == False:
             train_x = train_x.reshape(train_x.shape[0]*train_x.shape[1],train_x.shape[2])
         else:
