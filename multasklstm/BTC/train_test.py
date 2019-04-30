@@ -255,3 +255,19 @@ if __name__ == '__main__':
         val_models.append(val)
         task += 1
         run_time.append(running_time)
+    z = pd.DataFrame(np.array(run_stamp),columns=['FC','LSTM','LSTM-attention','Self-attention'],index = ['1-4','1-5','1-6'])
+    plt.plot(z.index,z.loc[:,'FC'])
+    plt.plot(z.index,z.loc[:,'LSTM'])
+    plt.plot(z.index,z.loc[:,'LSTM-attention'])
+    plt.plot(z.index,z.loc[:,'Self-attention'])
+    plt.scatter(z.index,z.loc[:,'FC'])
+    plt.scatter(z.index,z.loc[:,'LSTM'])
+    plt.scatter(z.index,z.loc[:,'LSTM-attention'])
+    plt.scatter(z.index,z.loc[:,'Self-attention'])
+     
+    plt.legend(loc='upper left')
+    plt.xlabel('task')
+    plt.ylabel('second')
+    plt.title('Running Time for Different Models for Different Task')
+    plt.show()
+    
