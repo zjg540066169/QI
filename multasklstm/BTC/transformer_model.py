@@ -115,9 +115,10 @@ class EncoderLayer(nn.Module):
         
     def forward(self, x, mask):
         x2 = self.norm_1(x)
-        x = x + self.dropout_1(self.attn(x2,x2,x2,mask))
-        x2 = self.norm_2(x)
-        x = x + self.dropout_2(self.ff(x2))
+        x = self.dropout_1(self.attn(x2,x2,x2,mask))
+        #x = x + self.dropout_1(self.attn(x2,x2,x2,mask))
+        #x2 = self.norm_2(x)
+        #x = x + self.dropout_2(self.ff(x2))
         return x
     
 # build a decoder layer with two multi-head attention layers and
@@ -187,15 +188,17 @@ class Transformer(nn.Module):
     def __init__(self, d_model, N, heads, dropout):
         super().__init__()
         self.encoder = Encoder( d_model, N, heads, dropout)
-        self.decoder = Decoder( d_model, N, heads, dropout)
+        #self.decoder = Decoder( d_model, N, heads, dropout)
         self.out = nn.Linear(d_model, 3)
         
     def forward(self, src, trg, src_mask, trg_mask):
         e_outputs = self.encoder(src, src_mask)
+        e_outputs = F.relu(e_outputs)[:,-1,:]
+        #print(e_outputs.size())
         #print("DECODER")
         #print("encoder:",e_outputs.size())
-        d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
+        #d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
         #print("decoder:",d_output.size())
-        output = self.out(d_output)
+        output = self.out(e_outputs)
         #print("fc:",output.size())
-        return output
+        return output.view(-1,3)

@@ -63,11 +63,11 @@ class Attn(nn.Module):
         encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
         attn_energies = self.score(hidden,encoder_outputs) # compute attention score
                 
-        return F.softmax(attn_energies).unsqueeze(1) # normalize with softmax
+        return F.softmax(attn_energies,dim=0).unsqueeze(1) # normalize with softmax
 
     def score(self, hidden, encoder_outputs):
         #print(hidden.size(),encoder_outputs.size())
-        energy = F.tanh(self.attn(torch.cat([hidden, encoder_outputs], 2))) # [B*T*2H]->[B*T*H]
+        energy = torch.tanh(self.attn(torch.cat([hidden, encoder_outputs], 2))) # [B*T*2H]->[B*T*H]
         energy = energy.transpose(2,1) # [B*H*T]
         v = self.v.repeat(encoder_outputs.data.shape[0],1).unsqueeze(1) #[B*1*H]
         energy = torch.bmm(v,energy) # [B*1*T]

@@ -16,7 +16,7 @@ class data_process(object):
         #self.data.index = self.data.loc[:,'time']
         self.data.drop(['time'],axis=1,inplace=True)
         #print(self.data.shape)
-        self.data = self.data#.iloc[int(len(self.data)/20)*1:int(len(self.data)/20)*2,:]
+        self.data = self.data.iloc[int(len(self.data)/3)*1:int(len(self.data)/3)*2,:]
         self.MulEncoding = MulEncoding
         self.ERROR_RATE = ERROR_RATE
         self.ERROR_RATE_Vol = ERROR_RATE_Vol
@@ -142,7 +142,7 @@ class data_process(object):
         input_length = self.input_length
         predict_length = self.predict_length
         last_length = self.last_length
-        predict_length_EMA_threhold = 24
+        predict_length_EMA_threhold = self.predict_length
         predict_length_EMA_all = 8
 
         train = self.train
@@ -157,14 +157,18 @@ class data_process(object):
                     try:
                         if i+j <0:
                             continue
-                        print(i+j,train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1)
-                        train_y.append([self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"]),self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length_EMA_threhold],"021_TR"]),self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length]),self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])])
+                        #print(i+j,train.shape[0] - input_length - max(predict_length_EMA_all,predict_length_EMA_threhold)*3 + 1)
+                        train_y.append([#self.__MAClassify(self.data.loc[self.train.index[i+input_length:i+input_length+predict_length_EMA_all],"021_TR"]),\
+                                        #self.__MAClassifyThrehold(self.data.loc[train.index[i+input_length:i+input_length+predict_length],"021_TR"])])
+                                        #self.__DCClassifyHigh(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])])
+                                        self.__DCClassifyLow(self.data.index[i+input_length:i+input_length+predict_length],self.train.index[i+input_length-last_length:i+input_length])])
+                                        #self.__YYClassify(self.data.loc[train.index[i+input_length:i+input_length+predict_length],:])])
                         train_x.append(train.iloc[i+j:i+input_length+j,:].values)
                     except IndexError as e:
-                        print(e)
+                        #print(e)
                         train_y = np.array(train_y)
                         train_x = np.array(train_x)
-                        print(train_x.shape,train_y.shape)
+                        #print(train_x.shape,train_y.shape)
 
                         exit()
                         break
@@ -253,6 +257,15 @@ class data_process(object):
             C = 1
         else:
             C = 2
+        return C
+
+    def __YYClassify(self,x0):
+        eRROR_RATE = self.ERROR_RATE
+        C = 0
+        if x0.loc[x0.index[0],'open'] < x0.loc[x0.index[-1],'close']:
+            C = 1
+        else:
+            C = 0
         return C
 
     
