@@ -11,7 +11,7 @@ Created on Sat Jul 28 14:03:19 2018
 
 @author: wang
 """
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from urllib import request
 from urllib.error import HTTPError
 from http.client import IncompleteRead
@@ -45,25 +45,73 @@ Timeblock = 8 * 3600
 
 
 
-class FCNN(torch.nn.Module):
-    def __init__(self,input_size):
-        super(FCNN, self).__init__()
-        self.hidden = 1000
+class FC_Ngram(torch.nn.Module):
+    def __init__(self, input_size, hidden_size_list,output_size, activation_list = 'relu', dropout = 0.3):
+        super().__init__()
+        
+        if type(hidden_size_list) is list:
+            self.hidden_layers_number = len(hidden_size_list)
+            hidden_size = [input_size] + hidden_size_list + [output_size]                
+        elif type(hidden_size_list) is int:
+            self.hidden_layers_number = len([hidden_size_list])
+            hidden_size = [input_size] + [hidden_size_list] + [output_size]
+            
+            
+        
+        if type(activation_list) is list:
+            
+            if len(activation_list) == 1:
+                self.activation = self.__activation_function_factory(activation_list[0],self.hidden_layers_number)
+
+            elif len(activation_list) != self.hidden_layers_number:
+                raise Exception('The number of activation functions is not equal to the number of hidden layers')
+                            
+            else:
+                self.activation = []
+                for act in activation_list:
+                    self.activation+= self.__activation_function_factory(act)
+                
+        else:
+            if type(activation_list) is str:
+                self.activation = self.__activation_function_factory(activation_list,self.hidden_layers_number)
+
+                    
+                    
+        self.linear_list = []
+        for i in range(len(hidden_size)-1):
+            self.linear_list.append(torch.nn.Linear(hidden_size[i], hidden_size[i+1]))
+        
+        self.bn = torch.nn.BatchNorm1d(hidden_size[-1])
+        self.out = torch.nn.Linear(hidden_size[-1],output_size)
+
+        
+        
         self.input_size = input_size
-        self.ln1 = torch.nn.Linear(self.input_size,self.hidden)
-        self.ln2 = torch.nn.Linear(self.hidden,self.hidden)
-        self.bn = torch.nn.BatchNorm1d(self.hidden)
-        self.out = torch.nn.Linear(self.hidden,2)
-    
-    def forward(self,x):
-        x = self.ln1(x)
-        x = F.sigmoid(x)
-        x = self.ln2(x)
-        x = F.relu(x)
+        self.output_size = output_size
+        self.hidden_size_list = hidden_size_list
+        
+        
+    def forward(self, x):
+        for num in range(len(self.linear_list)-1):
+            x = self.linear_list[num](x)
+            x = self.activation[num](x)
         x = self.bn(x)#BatchNormal
-        x = self.out(x)
         x = F.dropout(x, 0.5, self.training)
         return x
+    
+    def __activation_function_factory(self,activation,repeat_number = 1):
+        
+        activation_functions = ['relu','tanh','sigmoid']
+        
+        if activation not in activation_functions:
+            raise Exception('Please select activation functions in ',str(activation_functions))
+        
+        if activation == 'relu':
+            return [F.relu]*repeat_number
+        elif activation == 'tanh':
+            return [F.tanh]*repeat_number
+        elif activation == 'sigmoid':
+            return [F.sigmoid]*repeat_number
 
 
 def getData(start,end,plateform,coin,timespan,aggregate):
@@ -306,7 +354,7 @@ def reNew(path,svmPath,compare,train_acc = 0.85,test_acc = 0.77):
         
     continue_train = True
     while continue_train:
-        net = FCNN(train_x.shape[1])
+        net = FC_Ngram(train_x.shape[1],[200,300],2)
         cost = torch.nn.CrossEntropyLoss(torch.Tensor([0.8,0.2]))
         optimizer = optim.Adam(net.parameters(), lr=0.001)
         mse  = []
@@ -467,7 +515,7 @@ if __name__ == '__main__':
                     #print(response.text)
                     title = COIN+" - 1H 预测"+str(timeNow.year)+str(timeNow.month)+str(timeNow.day)+" "+ stampToTime(test_time[-1]+60*MINUTE+Timeblock)[-8:-3]+"新高"+'%.2f%%' % ( 100*predict_high.detach().numpy()[0][1])+",新低"+'%.2f%%' % ( 100*predict_low.detach().numpy()[0][1]) 
                     print(title)
-                    sendMail(title,sendmessage)
+                    #sendMail(title,sendmessage)
             time.sleep(60)
         if timeNow.hour % 3 == 0 and timeNow.minute == 20:
             highPath = reNew(COIN+r"1hourHigh/FC"+COIN+"High"+str(MINUTE)+"min"+str(int(last_length*MINUTE/60))+"hourlast"+str(int(predict_length*MINUTE/60))+"hourpre"+str(ERROR_RATE)+"error"+str(input_length)+"input2K.pth",COIN+r"1hourHigh/SVM"+COIN+"High"+str(MINUTE)+"min"+str(int(last_length*MINUTE/60))+"hourlast"+str(int(predict_length*MINUTE/60))+"hourpre0.005error"+str(input_length)+"input2K.m","High")

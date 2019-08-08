@@ -1,0 +1,27 @@
+{
+"model": "Attention_RNN",
+"long_input":false,
+"input_length":96,
+"hidden_size":300,
+"output_size":3,
+"batch_size":64,
+"rnnmodel":"GRU",
+"activation_function":"relu",
+"Feature_Processing":"Feature_Processing_MulKCompare",
+"training_data_path":"..//Data//bitfinex_2017-01-01_to_2019-01-14_eth_usdt_15m_singal_regular_20190526.json",
+"pca_path":"pca.m",
+"pca_dimension":50,
+"epochs":3,
+"model_path":"gru_attention_ETH.pth",
+"mul_K_compare":13,
+"timeblock":0,
+"plateform":"HUOBI",
+"coin":"ETH",
+"to":"USDT",
+"timespan":"1M",
+"aggregate":15,
+"con_regular":"20190402",
+"con_simple":"20190402",
+"send_lag":2
+
+}
