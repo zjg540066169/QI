@@ -10,10 +10,10 @@ Only when the parameters are saved as a JSON file can we load the parameters.
 @author: jungangzou
 """
 
-from Unified_Model.Based_Class.Parameters_Controll_base import Parameters_Controll_base
+from Unified_Model.Based_Class.Parameters_Control_base import Parameters_Control_base
 import json
 
-class Parameters_Controll(Parameters_Controll_base):
+class Parameters_Control(Parameters_Control_base):
     def __init__(self,parameters = None, path = None):
     #Initialize with parameters or load parameters from local file system
         super().__init__(parameters)
@@ -47,5 +47,5 @@ class Parameters_Controll(Parameters_Controll_base):
         
 if __name__ == '__main__':
     #test
-    pc = Parameters_Controll(path = 'parameters_1.json')
+    pc = Parameters_Control(path = 'parameters_1.json')
     pc.write_parameters_to_file('parameters_2.json')

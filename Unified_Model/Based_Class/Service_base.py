@@ -13,7 +13,7 @@ import abc
 from Unified_Model.Based_Class.Data_Processing_base import Data_Processing_base
 from Unified_Model.Based_Class.Machine_Learning_base import Machine_Learning_base
 from Unified_Model.Based_Class.Prediction_Result_Return_base import Prediction_Result_Return_base
-from Unified_Model.Based_Class.Parameters_Controll_base import Parameters_Controll_base
+from Unified_Model.Based_Class.Parameters_Control_base import Parameters_Control_base
 
 class Service_base(metaclass = abc.ABCMeta):
     def __init__(self,ML_model,DP_model,PR_model,PC_model):
@@ -27,8 +27,8 @@ class Service_base(metaclass = abc.ABCMeta):
         if not isinstance(PR_model,Prediction_Result_Return_base):
             raise TypeError('Please give a Prediction_Result_Return model instance')
             
-        if not isinstance(PC_model,Parameters_Controll_base):
-            raise TypeError('Please give a Parameters_Controll model instance')
+        if not isinstance(PC_model,Parameters_Control_base):
+            raise TypeError('Please give a Parameters_Control model instance')
 
         self.ML_model = ML_model
         self.DP_model = DP_model
@@ -71,6 +71,6 @@ class Service_base(metaclass = abc.ABCMeta):
         pass    
     
     @abc.abstractmethod
-    def parameter_controll(self):
+    def parameter_control(self):
     #This abstract method is defined to controll parameters from PC_model
         pass    

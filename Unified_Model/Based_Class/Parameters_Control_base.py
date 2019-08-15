@@ -3,7 +3,7 @@
 """
 Created on Fri Jun 14 14:52:46 2019
 
-This abstract class is defined as a specification to controll all the parameters. 
+This abstract class is defined as a specification to control all the parameters. 
 In this class, we should initialize it with parameters from outside.
 We defined some method to operate parameters include read, write, update. 
 In this abstract class, all the methods should be implemented in subclass.
@@ -13,7 +13,7 @@ In this abstract class, all the methods should be implemented in subclass.
 
 import abc
 
-class Parameters_Controll_base(metaclass = abc.ABCMeta):
+class Parameters_Control_base(metaclass = abc.ABCMeta):
     def __init__(self,parameters):
     #Initialize
         self.parameters = parameters

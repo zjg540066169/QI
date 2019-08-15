@@ -104,7 +104,7 @@ class Service(Service_base):
             self.parameters['predict_time'] = [time]
 
         
-    def parameter_controll(self,path):
+    def parameter_control(self,path):
         #save parameters to path.
         self.PC_model.set_parameters(self.parameters)
         self.PC_model.write_parameters_to_file(path)
@@ -119,11 +119,11 @@ if __name__ == '__main__':
     #predict
     from Unified_Model.Examples.Data_Processing import Data_Processing
     from Unified_Model.Examples.Machine_Learning_Model_NN import Machine_Learning_Model_NN
-    from Unified_Model.Examples.Parameters_Controll import Parameters_Controll
+    from Unified_Model.Examples.Parameters_Control import Parameters_Control
     from Unified_Model.Examples.Prediction_Result_Return import Prediction_Result_Return
     
     #initialize
-    pc = Parameters_Controll(path = 'parameters_1.json')
+    pc = Parameters_Control(path = 'parameters_1.json')
     parameters = pc.get_parameters()
     ml = Machine_Learning_Model_NN(parameters)
     pr = Prediction_Result_Return(parameters)
