@@ -84,7 +84,7 @@ class Data_Processing(Data_Processing_base):
         self.train_y_data[self.train_y_data == -1] = 2#
         
         #use FP_model to process data to features and get features.
-        self.FP_model.feature_processing(self.training_data.iloc[:int(len(self.training_data)/100),:],mode = 'training')
+        self.FP_model.feature_processing(self.training_data.iloc[:,:],mode = 'training')
         self.train_x_data = self.FP_model.get_features()
         
         
